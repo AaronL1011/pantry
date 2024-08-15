@@ -7,8 +7,9 @@ export async function initializeTables(db: Kysely<Database>) {
 		.createTable('item')
 		.ifNotExists()
 		.addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
-		.addColumn('name', 'text', (col) => col.notNull())
+		.addColumn('name', 'text', (col) => col.notNull().unique())
 		.addColumn('isle', 'text', (col) => col.notNull())
+		.addColumn('type', 'text', (col) => col.notNull())
 		.addColumn('stocked', 'boolean', (col) => col.notNull())
 		.addColumn('created_at', 'text', (col) => col.notNull()) // Assuming you'll store the date as a string
 		.execute();
@@ -19,6 +20,7 @@ export async function initializeTables(db: Kysely<Database>) {
 		.addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
 		.addColumn('name', 'text', (col) => col.notNull())
 		.addColumn('link', 'text', (col) => col.notNull())
+		.addColumn('portions', 'integer', (col) => col.notNull())
 		.addColumn('isCooking', 'boolean', (col) => col.notNull())
 		.execute();
 
@@ -30,6 +32,7 @@ export async function initializeTables(db: Kysely<Database>) {
 		.addColumn('recipe_id', 'text', (col) => col.notNull())
 		.addColumn('unit', 'text', (col) => col.notNull())
 		.addColumn('qty', 'integer', (col) => col.notNull())
+		.addUniqueConstraint('recipe_item_unique_constraint', ['recipe_id', 'item_id'])
 		.execute();
 }
 
@@ -45,6 +48,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 0,
 			name: 'almond milk',
+			type: 'ingredient',
 			isle: 'health food',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -52,6 +56,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 1,
 			name: 'chickpeas',
+			type: 'ingredient',
 			isle: 'canned goods',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -59,6 +64,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 2,
 			name: 'coconut milk',
+			type: 'ingredient',
 			isle: 'asian',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -66,6 +72,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 3,
 			name: 'spinach',
+			type: 'ingredient',
 			isle: 'produce',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -73,6 +80,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 4,
 			name: 'sweet potatoes',
+			type: 'ingredient',
 			isle: 'produce',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -80,6 +88,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 5,
 			name: 'tofu',
+			type: 'ingredient',
 			isle: 'plant based',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -87,6 +96,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 6,
 			name: 'quinoa',
+			type: 'ingredient',
 			isle: 'health food',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -94,6 +104,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 7,
 			name: 'nutritional yeast',
+			type: 'ingredient',
 			isle: 'health food',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -101,6 +112,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 8,
 			name: 'avocados',
+			type: 'ingredient',
 			isle: 'produce',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -108,6 +120,7 @@ async function seedItems(txn: Transaction<Database>) {
 		{
 			id: 9,
 			name: 'brown rice',
+			type: 'ingredient',
 			isle: 'grains',
 			stocked: 0,
 			created_at: new Date().toISOString()
@@ -126,13 +139,15 @@ async function seedRecipes(txn: Transaction<Database>) {
 			id: 0,
 			name: 'tofu bowl',
 			link: 'https://google.com',
-			isCooking: 0
+			isCooking: 0,
+			portions: 4
 		},
 		{
 			id: 1,
 			name: 'chickpea curry',
 			link: 'https://google.com',
-			isCooking: 0
+			isCooking: 0,
+			portions: 4
 		}
 	];
 

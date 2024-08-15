@@ -6,7 +6,7 @@
 	import { page } from '$app/stores';
 </script>
 
-<nav class="w-full bg-white fixed bottom-0 h-24 border-t-2 border-slate-100">
+<nav class="w-full bg-white fixed bottom-0 h-24 border-t-2 border-slate-200">
 	<ul class="flex flex-row justify-center gap-8 p-4">
 		<li>
 			<button

@@ -2,6 +2,9 @@
 	import CatIcon from './icons/CatIcon.svelte';
 	import { enhance } from '$app/forms';
 	import CloseIcon from './icons/CloseIcon.svelte';
+	import type { Isle, ItemType, NewItem } from '../types/db';
+	import { invalidateAll } from '$app/navigation';
+	import { toLower } from 'lodash-es';
 
 	let isOpen = $state(false);
 
@@ -27,6 +30,15 @@
 	function handleClose() {
 		isOpen = false;
 	}
+
+	async function onAddItem(newItem: NewItem) {
+		try {
+			await fetch('/api/item', { method: 'POST', body: JSON.stringify(newItem)});
+			invalidateAll();
+		} catch (error) {
+			console.log(error)
+		}
+	}
 </script>
 
 <button
@@ -43,20 +55,50 @@
 		<form
 			method="POST"
 			class="relative bg-white rounded-lg shadow-md w-full max-w-96 p-8 flex flex-col gap-4"
-			use:enhance={({ submitter, cancel, formData }) => {
+			use:enhance={async ({ submitter, cancel, formData }) => {
 				if (submitter?.id === 'cancel') {
 					isOpen = false;
 				}
 
 				const name = formData.get('name');
+				const type = formData.get('type');
 				const isle = formData.get('isle');
+				const stocked = formData.get('stocked');
+				console.log(name, isle, stocked)
+
+				if (!name || !isle || !type) {
+					cancel();
+					return;
+				}
+
+				const newItem: NewItem = {
+					name: (name as string).toLowerCase(),
+					type: (type as ItemType),
+					isle: (isle as Isle),
+					stocked: stocked ? 1 : 0,
+					created_at: new Date().toISOString()
+				}
+
+				await onAddItem(newItem)
 
 				cancel();
+				isOpen = false;
 			}}
 		>
 			<label for="name" class="flex flex-col gap-2">
 				Name
 				<input type="text" name="name" class="border-2 border-slate-200 rounded-md p-2" />
+			</label>
+
+			<label for="type" class="flex flex-col gap-2">
+				Type
+				<select name="type" class="border-2 border-slate-200 rounded-md p-2 bg-white">
+					<option value="ingredient">Ingredient</option>
+					<option value="snack">Snack</option>
+					<option value="non-perishable">Non-perishable</option>
+					<option value="drink">Drink</option>
+					<option value="other">Other</option>
+				</select>
 			</label>
 
 			<label for="isle" class="flex flex-col gap-2">
@@ -83,7 +125,8 @@
 				<CloseIcon />
 			</button>
 			<button
-				class="bg-orange-300 border-2 border-orange-400 py-4 px-8 text-white font-semibold rounded-md"
+				class="bg-orange-300 border-2 border-orange-400 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
+				
 			>
 				Add item
 			</button>

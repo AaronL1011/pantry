@@ -4,7 +4,8 @@
 	import { quintOut } from 'svelte/easing';
 	import { swipe, type SwipeCustomEvent } from 'svelte-gestures';
 	import type { PageData } from './$types';
-	import type { Item } from '../../types/db';
+	import type { Item, ItemUpdate } from '../../types/db';
+	import { invalidateAll } from '$app/navigation';
 
 	interface ListItem extends Item {
 		qty: number;
@@ -27,7 +28,6 @@
 				return acc;
 			}, {});
 	});
-	const stockedItems = $derived(list.filter((i) => i.stocked));
 
 	const handler = (value: number) => (event: SwipeCustomEvent) => {
 		switch (event.detail.direction) {
@@ -39,20 +39,33 @@
 		}
 	};
 
-	const stockItem = (id: number) => {
-		const indx = list.findIndex((val) => val.id === id);
-		// list[indx].stocked = true;
+	const stockItem = async (id: number) => {
+		try {
+            const updatedItem: ItemUpdate = {
+                id,
+				stocked: 1
+			}
+
+            await fetch('/api/item', { method: 'PUT', body: JSON.stringify(updatedItem)});
+            invalidateAll();
+        } catch (error) {
+            console.log(error)
+        }
 	};
 </script>
 
 <section class="h-full overflow-auto relative">
 	<h1 class="text-2xl font-semibold p-4 backdrop-blur-md">Shopping List</h1>
-	{#if list.length === 0 }
-		<p class="p-4 text-center text-slate-400">Come back when you have selected some recipes to cook!</p>
+	{#if list.length === 0}
+		<section class="flex flex-col justify-center h-3/4">
+			<p class="p-4 text-center text-slate-400">
+				All stocked up! What's cookin', good lookin'?
+			</p>
+		</section>
 	{/if}
 	<ul class="w-full p-4 flex flex-col gap-4">
 		{#each Object.keys(itemsByIsle).sort((a, b) => (a > b ? 1 : -1)) as isle (isle)}
-			<h2>{isle}</h2>
+			<h2 class="capitalize">{isle}</h2>
 			{#each itemsByIsle[isle]! as item (item.id)}
 				<li
 					use:swipe={{ timeframe: 300, minSwipeDistance: 60, touchAction: 'pan-y' }}
@@ -62,7 +75,7 @@
 					out:fly={{ x: 100 }}
 				>
 					<section class="flex flex-col gap-2">
-						<p class="font-medium">{item.name}</p>
+						<p class="font-medium capitalize">{item.name}</p>
 						<!-- <div class="flex gap-2 w-72 overflow-auto">
 						{#each item.recipes as recipe}
 							<span
@@ -78,31 +91,6 @@
 					</section>
 				</li>
 			{/each}
-		{/each}
-		{#if stockedItems.length > 0}
-			<h2>Stocked Items</h2>
-		{/if}
-		{#each stockedItems as stockedItem (stockedItem.id)}
-			<li
-				class="bg-white p-4 w-full flex justify-between gap-4 border-slate-200 border-2 rounded-2xl opacity-50"
-				animate:flip={{ delay: 250, duration: 250, easing: quintOut }}
-			>
-				<section class="flex flex-col gap-2">
-					<p class="font-medium">{stockedItem.name}</p>
-					<!-- <div class="flex gap-2 w-72 overflow-auto">
-					{#each stockedItem.recipes as recipe}
-						<span
-							class="text-xs font-medium text-slate-500 rounded text-nowrap py-1 px-2 bg-slate-200"
-							>{recipe}</span
-						>
-					{/each}
-				</div> -->
-				</section>
-				<section class="flex flex-col justify-center w-fit">
-					{stockedItem.qty}
-					{stockedItem.unit}
-				</section>
-			</li>
 		{/each}
 	</ul>
 </section>

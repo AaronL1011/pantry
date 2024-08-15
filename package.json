@@ -17,6 +17,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/better-sqlite3": "^7.6.11",
+		"@types/convert-units": "^2.3.9",
 		"@types/eslint": "^9.6.0",
 		"@types/lodash-es": "^4.17.12",
 		"autoprefixer": "^10.4.20",
@@ -37,6 +38,7 @@
 	"type": "module",
 	"dependencies": {
 		"better-sqlite3": "^11.1.2",
+		"convert-units": "^2.3.4",
 		"kysely": "^0.27.4",
 		"lodash-es": "^4.17.21",
 		"svelte-gestures": "^5.0.4"
