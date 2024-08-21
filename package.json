@@ -7,6 +7,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"preview:host": "vite preview --host",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
@@ -30,6 +31,7 @@
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^5.0.0-next.1",
 		"svelte-check": "^3.6.0",
+		"sveltekit-sse": "^0.13.5",
 		"tailwindcss": "^3.4.9",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.0.0",
@@ -41,6 +43,7 @@
 		"convert-units": "^2.3.4",
 		"kysely": "^0.27.4",
 		"lodash-es": "^4.17.21",
+		"nanoid": "^5.0.7",
 		"svelte-gestures": "^5.0.4"
 	}
 }

@@ -18,6 +18,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.where('recipe.isCooking', '=', 1)
 		.where('item.stocked', '=', 0)
 		.groupBy('item.id') // Group by item fields
+		.orderBy('item.name', 'asc')
 		.execute();
 
 	return {

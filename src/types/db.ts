@@ -1,13 +1,22 @@
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely';
-import type { Mass, Volume } from 'convert-units'
 export interface Database {
 	item: ItemTable;
 	recipe: RecipeTable;
 	recipeItem: RecipeItemTable;
 }
 
-export type Isle = "asian" | "canned goods" | "fridge" | "frozen" | "grains" | "health foods" | "herbs and spices" | "meats" | "produce" | "plant based"
-export type ItemType = "ingredient" | "snack" | "non-perishable" | "drink" | "other";
+export type Isle =
+	| 'asian'
+	| 'canned goods'
+	| 'fridge'
+	| 'frozen'
+	| 'grains'
+	| 'health foods'
+	| 'herbs and spices'
+	| 'meats'
+	| 'produce'
+	| 'plant based';
+export type ItemType = 'ingredient' | 'snack' | 'non-perishable' | 'drink' | 'other';
 export interface ItemTable {
 	id: Generated<number>;
 	name: string;
@@ -25,6 +34,8 @@ export interface RecipeTable {
 	id: Generated<number>;
 	name: string;
 	link?: string;
+	img?: Uint8Array;
+	img_mime_type?: string;
 	portions: number;
 	isCooking: number;
 	created_at: ColumnType<Date, string | undefined, never>;
@@ -34,7 +45,24 @@ export type Recipe = Selectable<RecipeTable>;
 export type NewRecipe = Insertable<RecipeTable>;
 export type RecipeUpdate = Updateable<RecipeTable>;
 
-export type MeasurementUnit = Mass | Volume | "";
+export type MeasurementUnit =
+	| 'ml'
+	| 'l'
+	| 'kl'
+	| 'tsp'
+	| 'Tbs'
+	| 'fl-oz'
+	| 'cup'
+	| 'pnt'
+	| 'qt'
+	| 'gal'
+	| 'mcg'
+	| 'mg'
+	| 'g'
+	| 'kg'
+	| 'oz'
+	| 'lb'
+	| '';
 
 export interface RecipeItemTable {
 	id: Generated<number>;

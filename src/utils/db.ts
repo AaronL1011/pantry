@@ -11,7 +11,7 @@ export async function initializeTables(db: Kysely<Database>) {
 		.addColumn('isle', 'text', (col) => col.notNull())
 		.addColumn('type', 'text', (col) => col.notNull())
 		.addColumn('stocked', 'boolean', (col) => col.notNull())
-		.addColumn('created_at', 'text', (col) => col.notNull()) // Assuming you'll store the date as a string
+		.addColumn('created_at', 'text', (col) => col.notNull())
 		.execute();
 
 	await db.schema
@@ -19,17 +19,20 @@ export async function initializeTables(db: Kysely<Database>) {
 		.ifNotExists()
 		.addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
 		.addColumn('name', 'text', (col) => col.notNull())
-		.addColumn('link', 'text', (col) => col.notNull())
+		.addColumn('link', 'text')
 		.addColumn('portions', 'integer', (col) => col.notNull())
 		.addColumn('isCooking', 'boolean', (col) => col.notNull())
+		.addColumn('img', 'blob')
+		.addColumn('img_mime_type', 'text')
+		.addColumn('created_at', 'text', (col) => col.notNull())
 		.execute();
 
 	await db.schema
 		.createTable('recipeItem')
 		.ifNotExists()
 		.addColumn('id', 'integer', (col) => col.primaryKey().autoIncrement())
-		.addColumn('item_id', 'text', (col) => col.notNull())
-		.addColumn('recipe_id', 'text', (col) => col.notNull())
+		.addColumn('item_id', 'integer', (col) => col.notNull())
+		.addColumn('recipe_id', 'integer', (col) => col.notNull())
 		.addColumn('unit', 'text', (col) => col.notNull())
 		.addColumn('qty', 'integer', (col) => col.notNull())
 		.addUniqueConstraint('recipe_item_unique_constraint', ['recipe_id', 'item_id'])
@@ -140,14 +143,16 @@ async function seedRecipes(txn: Transaction<Database>) {
 			name: 'tofu bowl',
 			link: 'https://google.com',
 			isCooking: 0,
-			portions: 4
+			portions: 4,
+			created_at: new Date().toISOString()
 		},
 		{
 			id: 1,
 			name: 'chickpea curry',
 			link: 'https://google.com',
 			isCooking: 0,
-			portions: 4
+			portions: 4,
+			created_at: new Date().toISOString()
 		}
 	];
 
@@ -156,13 +161,13 @@ async function seedRecipes(txn: Transaction<Database>) {
 			recipe_id: 0,
 			item_id: 4,
 			qty: 2,
-			unit: 'whole'
+			unit: ''
 		},
 		{
 			recipe_id: 0,
 			item_id: 5,
 			qty: 1,
-			unit: 'block'
+			unit: ''
 		},
 		{
 			recipe_id: 0,
@@ -174,25 +179,25 @@ async function seedRecipes(txn: Transaction<Database>) {
 			recipe_id: 0,
 			item_id: 8,
 			qty: 1,
-			unit: 'whole'
+			unit: ''
 		},
 		{
 			recipe_id: 1,
 			item_id: 1,
 			qty: 1,
-			unit: 'can'
+			unit: ''
 		},
 		{
 			recipe_id: 1,
 			item_id: 2,
 			qty: 1,
-			unit: 'can'
+			unit: ''
 		},
 		{
 			recipe_id: 1,
 			item_id: 3,
 			qty: 1,
-			unit: 'bunch'
+			unit: ''
 		},
 		{
 			recipe_id: 1,

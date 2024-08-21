@@ -4,7 +4,6 @@
 	import CloseIcon from './icons/CloseIcon.svelte';
 	import type { Isle, ItemType, NewItem } from '../types/db';
 	import { invalidateAll } from '$app/navigation';
-	import { toLower } from 'lodash-es';
 
 	let isOpen = $state(false);
 
@@ -27,7 +26,8 @@
 		isOpen = !isOpen;
 	}
 
-	function handleClose() {
+	function handleClose(e: Event) {
+		e.preventDefault()
 		isOpen = false;
 	}
 
@@ -42,7 +42,7 @@
 </script>
 
 <button
-	class="h-16 w-16 fixed bottom-32 right-4 rounded-full border-4 border-orange-500 bg-orange-400 text-white flex justify-center items-center shadow-xl active:scale-90 active:bg-orange-500 transition"
+	class="h-16 w-16 fixed bottom-32 right-4 rounded-full border-4 border-orange-600 bg-orange-500 text-white flex justify-center items-center shadow-xl active:scale-90 active:bg-orange-500 transition"
 	onclick={onClick}
 >
 	<CatIcon active={false} />
@@ -54,17 +54,16 @@
 	>
 		<form
 			method="POST"
-			class="relative bg-white rounded-lg shadow-md w-full max-w-96 p-8 flex flex-col gap-4"
+			class="relative bg-stone-800 border-2 border-stone-700 rounded-lg shadow-md w-full max-w-96 p-8 flex flex-col gap-4"
 			use:enhance={async ({ submitter, cancel, formData }) => {
-				if (submitter?.id === 'cancel') {
+				if (submitter?.id === "cancel") {
 					isOpen = false;
+					cancel()
 				}
-
 				const name = formData.get('name');
 				const type = formData.get('type');
 				const isle = formData.get('isle');
 				const stocked = formData.get('stocked');
-				console.log(name, isle, stocked)
 
 				if (!name || !isle || !type) {
 					cancel();
@@ -87,12 +86,12 @@
 		>
 			<label for="name" class="flex flex-col gap-2">
 				Name
-				<input type="text" name="name" class="border-2 border-slate-200 rounded-md p-2" />
+				<input type="text" name="name" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800" />
 			</label>
 
 			<label for="type" class="flex flex-col gap-2">
 				Type
-				<select name="type" class="border-2 border-slate-200 rounded-md p-2 bg-white">
+				<select name="type" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="ingredient">Ingredient</option>
 					<option value="snack">Snack</option>
 					<option value="non-perishable">Non-perishable</option>
@@ -103,7 +102,7 @@
 
 			<label for="isle" class="flex flex-col gap-2">
 				Isle
-				<select name="isle" class="border-2 border-slate-200 rounded-md p-2 bg-white">
+				<select name="isle" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="asian">Asian</option>
 					<option value="canned goods">Canned Goods</option>
 					<option value="fridge">Fridge</option>
@@ -121,11 +120,11 @@
 				<input type="checkbox" name="stocked" />
 				Stocked
 			</label>
-			<button id="cancel" class="absolute top-2 right-2 p-4">
+			<button id="cancel" class="absolute top-2 right-2 p-4" onclick={handleClose}>
 				<CloseIcon />
 			</button>
 			<button
-				class="bg-orange-300 border-2 border-orange-400 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
+				class="bg-orange-500 border-2 border-orange-600 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
 				
 			>
 				Add item

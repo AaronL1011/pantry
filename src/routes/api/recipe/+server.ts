@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { NewRecipe, NewRecipeItem, RecipeUpdate } from '../../../types/db';
+import { emitRecipeAddedEvent, emitRecipeUpdatedEvent } from '$lib/server/events';
 
 export const PUT: RequestHandler = async ({ locals, request }) => {
 	try {
@@ -13,11 +14,15 @@ export const PUT: RequestHandler = async ({ locals, request }) => {
 
 		if (recipeUpdate.id === undefined) error(400, 'No recipe id provided for update');
 
-		await db
+		const res = await db
 			.updateTable('recipe')
 			.set(recipeUpdate)
 			.where('recipe.id', '=', recipeUpdate.id)
 			.execute();
+
+		if (res.length > 0) {
+			emitRecipeUpdatedEvent(recipeUpdate);
+		}
 
 		return new Response(String('success'));
 	} catch (e) {
@@ -26,51 +31,64 @@ export const PUT: RequestHandler = async ({ locals, request }) => {
 	}
 };
 
-type NewRecipeRequest = {
+export type NewRecipeRequest = {
 	name: string;
 	link?: string;
+	img?: string;
+	img_mime_type?: string;
 	portions: number;
-	ingredients: Omit<NewRecipeItem, "recipe_id">[]
-}
+	ingredients: Omit<NewRecipeItem, 'recipe_id'>[];
+};
 
 export const POST: RequestHandler = async ({ locals, request }) => {
 	try {
 		const db = locals.db;
-		const newRecipeRequest = await request.json() as NewRecipeRequest;
+		const formData = await request.formData();
+		const image = formData.get('image');
+		const name = formData.get('name');
+		const portions = formData.get('portions');
+		const link = formData.get('link');
 
-		if (!(newRecipeRequest.portions > 0)) {
+		if (!(Number(portions) > 0)) {
 			error(400, 'Portions must be greater than 0');
 		}
 
+		const ingredientString = formData.get('ingredients');
+		const ingredients = JSON.parse(ingredientString as string) as NewRecipeRequest['ingredients'];
+
+		let imageBuffer;
+		let mimeType;
+		if (image) {
+			imageBuffer = Buffer.from(await (image as File).arrayBuffer());
+			mimeType = (image as File).type;
+		}
+
 		const newRecipe: NewRecipe = {
-			name: newRecipeRequest.name,
-			link: newRecipeRequest.link,
-			portions: newRecipeRequest.portions,
+			name: name as string,
+			link: link as string | undefined,
+			portions: Number(portions),
 			isCooking: 0,
+			img: imageBuffer,
+			img_mime_type: mimeType,
 			created_at: new Date().toISOString()
 		};
 
-		const res = await db
-			.insertInto('recipe')
-			.values(newRecipe)
-			.execute();
+		const res = await db.insertInto('recipe').values(newRecipe).execute();
 
 		if (!res[0].insertId) {
 			error(400, 'Failed to create recipe');
 		}
 
-		const newRecipeItems: NewRecipeItem[] = newRecipeRequest.ingredients.map((ingredient) => ({
-			recipe_id: res[0].insertId as unknown as number,
+		const newRecipeItems: NewRecipeItem[] = ingredients.map((ingredient) => ({
+			recipe_id: Number(res[0].insertId),
 			item_id: ingredient.item_id,
-			qty: ingredient.qty / newRecipeRequest.portions,
+			qty: ingredient.qty / Number(portions),
 			unit: ingredient.unit
-		}))
+		}));
 
-		await db
-			.insertInto('recipeItem')
-			.values(newRecipeItems)
-			.execute();
+		await db.insertInto('recipeItem').values(newRecipeItems).execute();
 
+		emitRecipeAddedEvent({ ...newRecipe, id: Number(res[0].insertId) });
 		return new Response(String('success'));
 	} catch (e) {
 		console.log(e);
