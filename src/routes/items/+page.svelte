@@ -1,21 +1,23 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import type { Item, ItemUpdate } from '../../types/db';
+	import type { ItemUpdate } from '../../types/db';
 	import AddItemButton from '../../components/AddItemButton.svelte';
 	import { sortBy } from 'lodash-es';
 	import { invalidateAll } from '$app/navigation';
 	import CheckIcon from '../../components/icons/CheckIcon.svelte';
 	import DeleteIcon from '../../components/icons/DeleteIcon.svelte';
 	import { press, type PressCustomEvent } from 'svelte-gestures';
+	import { usePantryList, type PantryItem } from '$lib/store';
 
 	const { data } = $props<{ data: PageData }>();
+	const pantryList = usePantryList;
+	let deleteCandidate = $state<PantryItem | null>(null);
 
-	type ListItem = Item & { recipeCount: number };
-	let list: ListItem[] = $derived(sortBy(data.items, 'name'));
+	$effect(() => {
+		pantryList.update(() => sortBy(data.items, 'name'));
+	});
 
-	let deleteCandidate = $state<ListItem | null>(null);
-
-	async function toggleStock(e: MouseEvent, item: ListItem) {
+	async function toggleStock(e: MouseEvent, item: PantryItem) {
 		e.stopPropagation();
 		try {
 			const updatedItem: ItemUpdate = {
@@ -30,7 +32,7 @@
 		}
 	}
 
-	function stageDelete(item: ListItem) {
+	function stageDelete(item: PantryItem) {
 		if (deleteCandidate?.id === item.id) {
 			deleteCandidate = null;
 			return;
@@ -58,11 +60,11 @@
 		}
 	}
 
-	function handler(item: ListItem) {
+	function handler(item: PantryItem) {
 		return (event: PressCustomEvent) => {
 			event.preventDefault();
-			stageDelete(item)
-		}
+			stageDelete(item);
+		};
 	}
 </script>
 
@@ -70,11 +72,11 @@
 <section class="h-full overflow-auto p-4 flex flex-col gap-4">
 	<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Pantry</h1>
 	<ul class="w-full gap-2 flex flex-col mb-28">
-		{#each list as item (item.id)}
+		{#each $pantryList as item (item.id)}
 			<li
 				use:press={{ timeframe: 300, triggerBeforeFinished: true }}
 				onpress={handler(item)}
-				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl active:scale-95 transition"
+				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl"
 			>
 				<section class="flex flex-col gap-0">
 					<p class="font-medium capitalize select-none">{item.name}</p>

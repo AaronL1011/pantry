@@ -1,4 +1,7 @@
 import { connection } from '$lib/clients';
+import { invalidate, invalidateAll } from '$app/navigation';
+import type { ItemUpdate } from '../types/db';
+import { usePantryList, useShoppingList } from './store';
 
 type Message = {
 	type: string;
@@ -25,10 +28,16 @@ export function registerEventStateHandlers() {
 function handleItemEvent(event: Message) {
 	switch (event.type) {
 		case 'itemAdded':
+			invalidateAll();
+			break;
 		case 'itemUpdated':
+			handleItemUpdatedEvent(JSON.parse(event.data as string) as ItemUpdate);
+			break;
 		case 'itemDeleted':
+			invalidateAll();
+			break;
 		default:
-			console.log(event);
+			console.log('unknown event');
 			break;
 	}
 }
@@ -38,7 +47,27 @@ function handleRecipeEvent(event: Message) {
 		case 'recipeAdded':
 		case 'recipeUpdated':
 		default:
-			console.log(event);
+			invalidateAll();
 			break;
 	}
+}
+
+async function handleItemUpdatedEvent(eventData: ItemUpdate) {
+	useShoppingList.update((prev) => {
+		return prev.map((item) => {
+			if (item.id === eventData.id) {
+				return { ...item, ...eventData };
+			}
+			return item;
+		});
+	});
+
+	usePantryList.update((prev) => {
+		return prev.map((item) => {
+			if (item.id === eventData.id) {
+				return { ...item, ...eventData };
+			}
+			return item;
+		});
+	});
 }
