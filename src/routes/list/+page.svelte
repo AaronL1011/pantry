@@ -3,7 +3,6 @@
 	import type { ItemUpdate, MeasurementUnit } from '../../types/db';
 	import { invalidateAll } from '$app/navigation';
 	import { useShoppingList, type ListItem } from '$lib/store';
-	import { onMount } from 'svelte';
 	import { groupBy } from 'lodash-es';
 	const { data } = $props<{
 		data: {

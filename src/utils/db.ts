@@ -1,6 +1,17 @@
 import { Kysely } from 'kysely';
-import type { Database, NewItem, NewRecipe, NewRecipeItem } from '../types/db';
+import type {
+	Database,
+	Isle,
+	ItemType,
+	MeasurementUnit,
+	NewItem,
+	NewRecipe,
+	NewRecipeItem
+} from '../types/db';
 import type { Transaction } from 'kysely';
+import itemsData from './items.json';
+import recipeItemsData from './recipe_items.json';
+import recipeData from './recipes.json';
 
 export async function initializeTables(db: Kysely<Database>) {
 	await db.schema
@@ -11,6 +22,7 @@ export async function initializeTables(db: Kysely<Database>) {
 		.addColumn('isle', 'text', (col) => col.notNull())
 		.addColumn('type', 'text', (col) => col.notNull())
 		.addColumn('stocked', 'boolean', (col) => col.notNull())
+		.addColumn('vegan', 'boolean', (col) => col.notNull())
 		.addColumn('created_at', 'text', (col) => col.notNull())
 		.execute();
 
@@ -47,88 +59,13 @@ export async function seedData(db: Kysely<Database>) {
 }
 
 async function seedItems(txn: Transaction<Database>) {
-	const items: NewItem[] = [
-		{
-			id: 0,
-			name: 'almond milk',
-			type: 'ingredient',
-			isle: 'health food',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 1,
-			name: 'chickpeas',
-			type: 'ingredient',
-			isle: 'canned goods',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 2,
-			name: 'coconut milk',
-			type: 'ingredient',
-			isle: 'asian',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 3,
-			name: 'spinach',
-			type: 'ingredient',
-			isle: 'produce',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 4,
-			name: 'sweet potatoes',
-			type: 'ingredient',
-			isle: 'produce',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 5,
-			name: 'tofu',
-			type: 'ingredient',
-			isle: 'plant based',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 6,
-			name: 'quinoa',
-			type: 'ingredient',
-			isle: 'health food',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 7,
-			name: 'nutritional yeast',
-			type: 'ingredient',
-			isle: 'health food',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 8,
-			name: 'avocados',
-			type: 'ingredient',
-			isle: 'produce',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 9,
-			name: 'brown rice',
-			type: 'ingredient',
-			isle: 'grains',
-			stocked: 0,
-			created_at: new Date().toISOString()
-		}
-	];
+	const items: NewItem[] = itemsData.map((item) => ({
+		...item,
+		type: item.type as ItemType,
+		isle: item.isle as Isle,
+		created_at: new Date().toISOString()
+	}));
+
 	await txn
 		.insertInto('item')
 		.values(items)
@@ -137,75 +74,16 @@ async function seedItems(txn: Transaction<Database>) {
 }
 
 async function seedRecipes(txn: Transaction<Database>) {
-	const recipes: NewRecipe[] = [
-		{
-			id: 0,
-			name: 'tofu bowl',
-			link: 'https://google.com',
-			isCooking: 0,
-			portions: 4,
-			created_at: new Date().toISOString()
-		},
-		{
-			id: 1,
-			name: 'chickpea curry',
-			link: 'https://google.com',
-			isCooking: 0,
-			portions: 4,
-			created_at: new Date().toISOString()
-		}
-	];
+	const recipes: NewRecipe[] = recipeData.map((recipe) => ({
+		...recipe,
+		link: recipe.link ?? undefined,
+		created_at: new Date().toISOString()
+	}));
 
-	const recipeItems: NewRecipeItem[] = [
-		{
-			recipe_id: 0,
-			item_id: 4,
-			qty: 2,
-			unit: ''
-		},
-		{
-			recipe_id: 0,
-			item_id: 5,
-			qty: 1,
-			unit: ''
-		},
-		{
-			recipe_id: 0,
-			item_id: 6,
-			qty: 1,
-			unit: 'cup'
-		},
-		{
-			recipe_id: 0,
-			item_id: 8,
-			qty: 1,
-			unit: ''
-		},
-		{
-			recipe_id: 1,
-			item_id: 1,
-			qty: 1,
-			unit: ''
-		},
-		{
-			recipe_id: 1,
-			item_id: 2,
-			qty: 1,
-			unit: ''
-		},
-		{
-			recipe_id: 1,
-			item_id: 3,
-			qty: 1,
-			unit: ''
-		},
-		{
-			recipe_id: 1,
-			item_id: 9,
-			qty: 1,
-			unit: 'cup'
-		}
-	];
+	const recipeItems: NewRecipeItem[] = recipeItemsData.map((recipeItem) => ({
+		...recipeItem,
+		unit: recipeItem.unit as MeasurementUnit
+	}));
 
 	await txn
 		.insertInto('recipe')

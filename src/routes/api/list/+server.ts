@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import { type MeasurementUnit } from '../../../types/db';
 import convert from 'convert-units';
 import type { ListItem } from '$lib/store';
-import { groupBy } from 'lodash-es';
 
 const volumePossibilities = convert().possibilities('volume');
 const massPossibilities = convert().possibilities('mass');
@@ -26,6 +25,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 				'recipe.portions'
 			])
 			.where('recipe.isCooking', '=', 1)
+			.where('item.type', '=', 'ingredient')
 			.orderBy('item.name', 'asc')
 			.execute();
 		// Define common units, e.g., 'g' for mass or 'ml' for volume
@@ -34,6 +34,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		// Group items by item ID
 		const itemsMap: Record<string, ListItem> = {};
+		let finalUnit: MeasurementUnit = '';
 
 		recipeItems.forEach((row) => {
 			const itemId = row.id;
@@ -43,10 +44,8 @@ export const GET: RequestHandler = async ({ locals }) => {
 			const unit = row.unit;
 
 			let convertedQty;
-			let finalUnit: MeasurementUnit;
 
 			if (unit === '') {
-				finalUnit = '';
 				convertedQty = rawQty;
 			} else if (massPossibilities.includes(unit)) {
 				// Convert mass units
@@ -67,16 +66,17 @@ export const GET: RequestHandler = async ({ locals }) => {
 					name: itemName,
 					isle: isle,
 					stocked: row.stocked,
+					vegan: row.vegan,
 					qty: {
 						whole: 0, // Initialize whole unit sum
 						commonUnit: 0, // Initialize common unit sum
-						unitType: finalUnit // Store the type of common unit (g or ml)
+						unitType: unit // Store the type of common unit (g or ml)
 					}
 				};
 			}
 
 			// Sum the quantities in the appropriate category
-			if (finalUnit === '') {
+			if (unit === '') {
 				itemsMap[itemId].qty.whole += convertedQty;
 			} else {
 				itemsMap[itemId].qty.commonUnit += Math.ceil(convertedQty);

@@ -22,6 +22,7 @@ export interface ItemTable {
 	name: string;
 	isle: string;
 	type: ItemType;
+	vegan: number;
 	stocked: number;
 	created_at: ColumnType<Date, string | undefined, never>;
 }

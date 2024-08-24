@@ -6,8 +6,9 @@
 	import { invalidateAll } from '$app/navigation';
 	import CheckIcon from '../../components/icons/CheckIcon.svelte';
 	import DeleteIcon from '../../components/icons/DeleteIcon.svelte';
-	import { press, type PressCustomEvent } from 'svelte-gestures';
+	import { press, tap, type PressCustomEvent } from 'svelte-gestures';
 	import { usePantryList, type PantryItem } from '$lib/store';
+	import Pill from '../../components/Pill.svelte';
 
 	const { data } = $props<{ data: PageData }>();
 	const pantryList = usePantryList;
@@ -60,11 +61,17 @@
 		}
 	}
 
-	function handler(item: PantryItem) {
+	function pressHandler(item: PantryItem) {
 		return (event: PressCustomEvent) => {
 			event.preventDefault();
 			stageDelete(item);
 		};
+	}
+
+	function tapHandler() {
+		if (deleteCandidate) {
+			deleteCandidate = null;
+		}
 	}
 </script>
 
@@ -75,26 +82,26 @@
 		{#each $pantryList as item (item.id)}
 			<li
 				use:press={{ timeframe: 300, triggerBeforeFinished: true }}
-				onpress={handler(item)}
-				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl"
+				onpress={pressHandler(item)}
+				use:tap={{ timeframe: 300 }}
+				ontap={tapHandler}
+				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl transition active:scale-[0.98]"
 			>
-				<section class="flex flex-col gap-0">
-					<p class="font-medium capitalize select-none">{item.name}</p>
-					{#if item.recipeCount > 0}
-						<p class="text-sm text-gray-500 select-none">{item.recipeCount} recipes</p>
-					{/if}
+				<section class="flex flex-col gap-2">
+					<p class="font-medium text-sm capitalize select-none">{item.name}</p>
+					<Pill>{item.type}</Pill>
 				</section>
-				<section class="flex">
+				<section class="flex items-center">
 					{#if deleteCandidate && deleteCandidate.id === item.id}
 						<button
-							class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-zinc-50 transition text-red-400"
+							class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-zinc-50 transition text-red-400 h-fit"
 							onclick={(e) => deleteItem(e)}
 						>
 							<DeleteIcon />
 						</button>
 					{:else}
 						<button
-							class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-700 transition text-stone-200 flex"
+							class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-700 transition text-stone-200 flex h-fit"
 							onclick={(e) => toggleStock(e, item)}
 						>
 							<CheckIcon active={!!item.stocked} />

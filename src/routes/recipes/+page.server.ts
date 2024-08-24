@@ -5,33 +5,21 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const recipes = await db
 		.selectFrom('recipe')
-		.select([
-			'id',
-			'name',
-			'link',
-			'created_at',
-			'isCooking',
-			'portions',
-			'img_mime_type'
-		])
+		.select(['id', 'name', 'link', 'created_at', 'isCooking', 'portions', 'img_mime_type'])
 		.execute();
 
 	// Get the ingredients for each recipe
 	const recipeingredients = await db
-	.selectFrom('recipeItem')
-	.innerJoin('item', 'recipeItem.item_id', 'item.id')
-	.select([
-		'recipeItem.recipe_id',
-		'item.name'
-	])
-	.execute();
+		.selectFrom('recipeItem')
+		.innerJoin('item', 'recipeItem.item_id', 'item.id')
+		.select(['recipeItem.recipe_id', 'item.name'])
+		.orderBy('name', 'asc')
+		.execute();
 
 	// Combine recipes with their ingredients
-	const recipesWithingredients = recipes.map(recipe => ({
-	...recipe,
-	ingredients: recipeingredients
-		.filter(ri => ri.recipe_id === recipe.id)
-		.map(ri => ri.name)
+	const recipesWithingredients = recipes.map((recipe) => ({
+		...recipe,
+		ingredients: recipeingredients.filter((ri) => ri.recipe_id === recipe.id).map((ri) => ri.name)
 	}));
 
 	const items = await db

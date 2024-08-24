@@ -74,8 +74,8 @@
 			let i = 0;
 			const ingredients: NewRecipeRequest['ingredients'] = [];
 			selectedItems.forEach((val, key) => {
-				ingredients.push({ item_id: key, qty: val.qty, unit: val.unit })
-			})
+				ingredients.push({ item_id: key, qty: val.qty, unit: val.unit });
+			});
 
 			formData.append('ingredients', JSON.stringify(ingredients));
 
@@ -128,8 +128,8 @@
 		const updatedItem = selectedItems.get(itemId);
 		if (!updatedItem) return;
 
-		// @ts-ignore stfu typescript its a real value
-		updatedItem.unit = e.target?.value!;
+		// @ts-expect-error stfu typescript its a real value
+		updatedItem.unit = e.target?.value;
 	}
 
 	function handleFileChange(event: Event) {
@@ -144,7 +144,7 @@
 	class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-900 transition text-sm font-semibold text-orange-500"
 	onclick={onClick}
 >
-	Add a new recipe
+	New recipe
 </button>
 
 {#if isOpen}
@@ -225,7 +225,7 @@
 					class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-700 transition text-sm font-semibold text-stone-400"
 					onclick={toggleAddingredients}
 				>
-					Add ingredients
+					{selectedItems.size > 0 ? 'Change ingredients' : 'Add ingredients'}
 				</button>
 				<div class="flex gap-1 items-center text-stone-200">
 					<button

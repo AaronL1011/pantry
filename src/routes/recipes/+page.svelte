@@ -11,6 +11,7 @@
 	import CaretRight from '../../components/icons/CaretRight.svelte';
 	import PortionCount from '../../components/icons/PortionCount.svelte';
 	import AddRecipeButton from '../../components/AddRecipeButton.svelte';
+	import Pill from '../../components/Pill.svelte';
 
 	const { data } = $props<{ data: PageData }>();
 	// TODO: store server state in a writable store and apply atomic updates from events.
@@ -48,6 +49,18 @@
 	}
 </script>
 
+{#snippet recipeTitle(recipe: RecipeListItem)}
+	{#if !recipe.link}
+		<p class="font-medium text-sm capitalize">{recipe.name}</p>
+	{:else}
+		<div class="flex flex-col gap-0.5">
+			<p class="font-medium text-sm capitalize">{recipe.name}</p>
+			<a class="text-xs text-orange-300" href={recipe.link} target="_blank">View recipe</a>
+			<!-- <LinkIcon height={14} width={14} /> -->
+		</div>
+	{/if}
+{/snippet}
+
 <section class="h-full overflow-auto p-4 flex flex-col gap-4">
 	<div class="flex justify-between">
 		<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Recipes</h1>
@@ -69,11 +82,11 @@
 						/>
 					{/if}
 					<section class="p-4 flex flex-col gap-2">
-						<div class="flex justify-between w-full">
-							<p class="font-medium capitalize max-w-40">{item.name}</p>
+						<div class="flex justify-between w-full gap-2">
+							{@render recipeTitle(item)}
 							<div class="flex gap-2">
 								{#if !!item.isCooking}
-									<div class="flex gap-1 items-center">
+									<div class="flex gap-1 items-center h-fit">
 										<button
 											class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-zinc-50 transition text-gray-400 active:text-gray-600"
 											onclick={() => updatePortions(item.id, item.portions - 1)}
@@ -90,7 +103,7 @@
 									</div>
 								{/if}
 								<button
-									class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-700 transition"
+									class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-stone-700 transition h-fit"
 									onclick={() => setCooking(item)}
 								>
 									<CookingIcon active={!!item.isCooking} />
@@ -98,11 +111,8 @@
 							</div>
 						</div>
 						<div class="flex gap-1 flex-wrap">
-							{#each item.ingredients as ingredients}
-								<span
-									class="bg-stone-700 text-stone-200 p-2 text-xs font-semibold rounded capitalize"
-									>{ingredients}</span
-								>
+							{#each item.ingredients as ingredient}
+								<Pill>{ingredient}</Pill>
 							{/each}
 						</div>
 					</section>

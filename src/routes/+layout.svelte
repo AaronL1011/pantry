@@ -23,7 +23,7 @@
 	.bg-image {
 		background-image: url('/doodle-bg.jpg');
 		background-repeat: repeat;
-		background-size: 170%;
+		background-size: 198%;
 		background-position: center;
 	}
 </style>

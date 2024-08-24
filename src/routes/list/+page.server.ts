@@ -10,7 +10,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 
 	const items = await res.json();
-
 	return {
 		items
 	};
