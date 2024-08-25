@@ -27,16 +27,16 @@
 	}
 
 	function handleClose(e: Event) {
-		e.preventDefault()
+		e.preventDefault();
 		isOpen = false;
 	}
 
 	async function onAddItem(newItem: NewItem) {
 		try {
-			await fetch('/api/item', { method: 'POST', body: JSON.stringify(newItem)});
+			await fetch('/api/item', { method: 'POST', body: JSON.stringify(newItem) });
 			invalidateAll();
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 		}
 	}
 </script>
@@ -54,11 +54,11 @@
 	>
 		<form
 			method="POST"
-			class="relative bg-stone-800 border-2 border-stone-700 rounded-lg shadow-md w-full max-w-96 p-8 flex flex-col gap-4"
+			class="relative bg-stone-800 border border-stone-700 rounded-lg shadow-md w-full max-w-96 p-8 flex flex-col gap-4"
 			use:enhance={async ({ submitter, cancel, formData }) => {
-				if (submitter?.id === "cancel") {
+				if (submitter?.id === 'cancel') {
 					isOpen = false;
-					cancel()
+					cancel();
 				}
 				const name = formData.get('name');
 				const type = formData.get('type');
@@ -72,13 +72,13 @@
 
 				const newItem: NewItem = {
 					name: (name as string).toLowerCase(),
-					type: (type as ItemType),
-					isle: (isle as Isle),
+					type: type as ItemType,
+					isle: isle as Isle,
 					stocked: stocked ? 1 : 0,
 					created_at: new Date().toISOString()
-				}
+				};
 
-				await onAddItem(newItem)
+				await onAddItem(newItem);
 
 				cancel();
 				isOpen = false;
@@ -86,12 +86,16 @@
 		>
 			<label for="name" class="flex flex-col gap-2">
 				Name
-				<input type="text" name="name" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800" />
+				<input
+					type="text"
+					name="name"
+					class="border border-stone-700 rounded-md p-2 bg-stone-800"
+				/>
 			</label>
 
 			<label for="type" class="flex flex-col gap-2">
 				Type
-				<select name="type" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800">
+				<select name="type" class="border border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="ingredient">Ingredient</option>
 					<option value="snack">Snack</option>
 					<option value="non-perishable">Non-perishable</option>
@@ -102,7 +106,7 @@
 
 			<label for="isle" class="flex flex-col gap-2">
 				Isle
-				<select name="isle" class="border-2 border-stone-700 rounded-md p-2 bg-stone-800">
+				<select name="isle" class="border border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="asian">Asian</option>
 					<option value="canned goods">Canned Goods</option>
 					<option value="fridge">Fridge</option>
@@ -124,8 +128,7 @@
 				<CloseIcon />
 			</button>
 			<button
-				class="bg-orange-500 border-2 border-orange-600 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
-				
+				class="bg-orange-500 border border-orange-600 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
 			>
 				Add item
 			</button>

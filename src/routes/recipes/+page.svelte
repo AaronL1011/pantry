@@ -69,7 +69,7 @@
 	<ul class="w-full gap-2 flex flex-col">
 		{#each list as item (item.id)}
 			<li
-				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl overflow-hidden"
+				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border rounded-xl overflow-hidden"
 				animate:flip={{ delay: 250, duration: 250, easing: quintOut }}
 				out:fly={{ x: 100 }}
 			>
@@ -112,7 +112,7 @@
 						</div>
 						<div class="flex gap-1 flex-wrap">
 							{#each item.ingredients as ingredient}
-								<Pill>{ingredient}</Pill>
+								<Pill color="bg-stone-600">{ingredient}</Pill>
 							{/each}
 						</div>
 					</section>

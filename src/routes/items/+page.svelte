@@ -2,20 +2,55 @@
 	import type { PageData } from './$types';
 	import type { ItemUpdate } from '../../types/db';
 	import AddItemButton from '../../components/AddItemButton.svelte';
-	import { sortBy } from 'lodash-es';
+	import { orderBy, sortBy } from 'lodash-es';
 	import { invalidateAll } from '$app/navigation';
 	import CheckIcon from '../../components/icons/CheckIcon.svelte';
 	import DeleteIcon from '../../components/icons/DeleteIcon.svelte';
 	import { press, tap, type PressCustomEvent } from 'svelte-gestures';
 	import { usePantryList, type PantryItem } from '$lib/store';
 	import Pill from '../../components/Pill.svelte';
+	import SearchFilter from '../../components/SearchFilter.svelte';
+	import { itemTypePillColor } from '../../components/utils';
 
 	const { data } = $props<{ data: PageData }>();
-	const pantryList = usePantryList;
 	let deleteCandidate = $state<PantryItem | null>(null);
+	let searchValue = $state<string>('');
+	let filter = $state<string>('alpha');
 
 	$effect(() => {
-		pantryList.update(() => sortBy(data.items, 'name'));
+		usePantryList.update(() => sortBy(data.items, 'name'));
+	});
+
+	const stockFilter = (item: PantryItem) => {
+		if (filter === 'in_stock') {
+			return !!item.stocked;
+		} else if (filter === 'out_of_stock') {
+			return !item.stocked;
+		}
+
+		return true;
+	};
+
+	const searchFilter = (item: PantryItem) => {
+		if (searchValue === '') return true;
+
+		return item.name.toLowerCase().includes(searchValue.toLowerCase());
+	};
+
+	const pantryList = $derived.by(() => {
+		if (filter === 'alpha') {
+			return sortBy($usePantryList.filter(stockFilter).filter(searchFilter), 'name');
+		} else if (filter === 'date_created') {
+			return orderBy(
+				$usePantryList.filter(stockFilter).filter(searchFilter),
+				'date_created',
+				'desc'
+			);
+		} else if (filter === 'item_type') {
+			return sortBy($usePantryList.filter(stockFilter).filter(searchFilter), 'type');
+		} else {
+			return $usePantryList.filter(stockFilter).filter(searchFilter);
+		}
 	});
 
 	async function toggleStock(e: MouseEvent, item: PantryItem) {
@@ -77,19 +112,36 @@
 
 <AddItemButton />
 <section class="h-full overflow-auto p-4 flex flex-col gap-4">
-	<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Pantry</h1>
+	<div class="flex justify-between gap-2">
+		<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Pantry</h1>
+		<SearchFilter
+			bind:searchValue
+			bind:filter
+			filterOptions={[
+				{ title: 'Alphabetical', description: 'Order by item name', value: 'alpha' },
+				{ title: 'Date Created', description: 'Order by newest first', value: 'date_created' },
+				{
+					title: 'In Stock',
+					description: 'View items in the pantry',
+					value: 'in_stock'
+				},
+				{ title: 'Out of Stock', description: 'View items needed to buy', value: 'out_of_stock' },
+				{ title: 'Item Type', description: 'Order by item type', value: 'item_type' }
+			]}
+		/>
+	</div>
 	<ul class="w-full gap-2 flex flex-col mb-28">
-		{#each $pantryList as item (item.id)}
+		{#each pantryList as item (item.id)}
 			<li
 				use:press={{ timeframe: 300, triggerBeforeFinished: true }}
 				onpress={pressHandler(item)}
 				use:tap={{ timeframe: 300 }}
 				ontap={tapHandler}
-				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-xl transition active:scale-[0.98]"
+				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border rounded-xl transition active:scale-[0.98]"
 			>
 				<section class="flex flex-col gap-2">
 					<p class="font-medium text-sm capitalize select-none">{item.name}</p>
-					<Pill>{item.type}</Pill>
+					<Pill color={itemTypePillColor[item.type]}>{item.type}</Pill>
 				</section>
 				<section class="flex items-center">
 					{#if deleteCandidate && deleteCandidate.id === item.id}

@@ -208,7 +208,7 @@
 			<input
 				type="text"
 				name="name"
-				class="border-2 border-stone-700 rounded-md p-2 bg-stone-800"
+				class="border border-stone-700 rounded-md p-2 bg-stone-800"
 				placeholder="Name"
 			/>
 
@@ -217,7 +217,7 @@
 				placeholder="Recipe link"
 				type="text"
 				name="link"
-				class="border-2 border-stone-700 rounded-md p-2 bg-stone-800"
+				class="border border-stone-700 rounded-md p-2 bg-stone-800"
 			/>
 
 			<div class="flex gap-2 justify-between">
@@ -260,14 +260,14 @@
 								type="number"
 								name="qty"
 								id="qty"
-								class="w-12 border-2 border-stone-700 p-2 rounded bg-stone-800"
+								class="w-12 border border-stone-700 p-2 rounded bg-stone-800"
 								placeholder="Qty"
 								onchange={(e) => handleQtyUpdate(e, ingredient[0])}
 							/>
 							<select
 								name="unit"
 								id="unit"
-								class="w-20 border-2 border-stone-700 p-2 rounded bg-stone-800"
+								class="w-20 border border-stone-700 p-2 rounded bg-stone-800"
 								onchange={(e) => handleUnitUpdate(e, ingredient[0])}
 							>
 								{#each Object.keys(units) as unit}
@@ -283,7 +283,7 @@
 				<CloseIcon />
 			</button>
 			<button
-				class="bg-orange-500 border-2 border-orange-600 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
+				class="bg-orange-500 border border-orange-600 py-4 px-8 text-white font-semibold rounded-md active:scale-90 active:bg-orange-400 transition"
 				type="submit"
 			>
 				Add Recipe
@@ -299,7 +299,7 @@
 						Done
 					</button>
 					<input
-						class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-lg"
+						class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border rounded-lg"
 						placeholder="Search ingredients"
 						bind:value={searchValue}
 					/>
@@ -307,7 +307,7 @@
 						{#each listOptions as option (option.id)}
 							<li animate:flip={{ delay: 100, duration: 100, easing: quintOut }}>
 								<button
-									class="bg-stone-800 p-2 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-md capitalize whitespace-nowrap text-stone-200"
+									class="bg-stone-800 p-2 w-full flex justify-between gap-4 border-stone-700 border rounded-md capitalize whitespace-nowrap text-stone-200"
 									onclick={addingredient(option)}
 								>
 									{option.name}

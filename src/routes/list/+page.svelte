@@ -88,7 +88,7 @@
 				<li
 					use:swipe={{ timeframe: 300, minSwipeDistance: 60, touchAction: 'pan-y' }}
 					onswipe={handler(item.id)}
-					class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border-2 rounded-2xl"
+					class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border rounded-2xl"
 				>
 					<section class="flex flex-col gap-2">
 						<p class="font-medium capitalize">{item.name}</p>
