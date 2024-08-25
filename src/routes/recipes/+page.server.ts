@@ -6,6 +6,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const recipes = await db
 		.selectFrom('recipe')
 		.select(['id', 'name', 'link', 'created_at', 'isCooking', 'portions', 'img_mime_type'])
+		.orderBy('name', 'asc')
 		.execute();
 
 	// Get the ingredients for each recipe

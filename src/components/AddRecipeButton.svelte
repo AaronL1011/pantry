@@ -11,6 +11,7 @@
 	import CheckIcon from './icons/CheckIcon.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { NewRecipeRequest } from '../routes/api/recipe/+server';
+	import ChefIcon from './icons/ChefIcon.svelte';
 
 	const units: { [key in MeasurementUnit]: string } = {
 		'': 'Whole',
@@ -71,7 +72,6 @@
 			if (newRecipe.portions) formData.append('portions', newRecipe.portions.toString());
 			if (newRecipe.link) formData.append('link', newRecipe.link);
 
-			let i = 0;
 			const ingredients: NewRecipeRequest['ingredients'] = [];
 			selectedItems.forEach((val, key) => {
 				ingredients.push({ item_id: key, qty: val.qty, unit: val.unit });
@@ -120,8 +120,8 @@
 		const updatedItem = selectedItems.get(itemId);
 		if (!updatedItem) return;
 
-		// @ts-ignore stfu typescript its a real value
-		updatedItem.qty = e.target?.value!;
+		// @ts-expect-error stfu typescript its a real value
+		updatedItem.qty = e.target?.value;
 	}
 
 	function handleUnitUpdate(e: Event, itemId: number) {
@@ -141,10 +141,10 @@
 </script>
 
 <button
-	class="bg-stone-800 rounded-lg p-2 active:scale-90 active:bg-stone-900 transition text-sm font-semibold text-orange-500"
+	class="h-16 w-16 fixed bottom-32 right-4 rounded-full border-4 border-orange-600 bg-orange-500 text-white flex justify-center items-center shadow-xl active:scale-90 active:bg-orange-500 transition"
 	onclick={onClick}
 >
-	New recipe
+	<ChefIcon active={isOpen} />
 </button>
 
 {#if isOpen}

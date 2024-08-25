@@ -4,20 +4,52 @@
 	import { quintOut } from 'svelte/easing';
 	import type { PageData } from './$types';
 	import type { Recipe, RecipeUpdate } from '../../types/db';
-	import { sortBy } from 'lodash-es';
+	import { orderBy } from 'lodash-es';
 	import CookingIcon from '../../components/icons/CookingIcon.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import CaretLeft from '../../components/icons/CaretLeft.svelte';
 	import CaretRight from '../../components/icons/CaretRight.svelte';
 	import PortionCount from '../../components/icons/PortionCount.svelte';
 	import AddRecipeButton from '../../components/AddRecipeButton.svelte';
+	import SearchFilter from '../../components/SearchFilter.svelte';
 	import Pill from '../../components/Pill.svelte';
 
 	const { data } = $props<{ data: PageData }>();
-	// TODO: store server state in a writable store and apply atomic updates from events.
-	// and invalidate some requests when the state updates are too hectic
+	let searchValue = $state<string>('');
+	let filter = $state<string>('alpha');
 	type RecipeListItem = Recipe & { ingredients: string[] };
-	let list: RecipeListItem[] = $derived(sortBy(data.recipes, 'name'));
+
+	const recipeFilter = (item: RecipeListItem) => {
+		if (filter === 'is_cooking') {
+			return !!item.isCooking;
+		} else if (filter === 'simple') {
+			return item.ingredients.length < 6;
+		}
+
+		return true;
+	};
+
+	const searchFilter = (item: RecipeListItem) => {
+		if (searchValue === '') return true;
+
+		return item.name.toLowerCase().includes(searchValue.toLowerCase());
+	};
+
+	let list: RecipeListItem[] = $derived.by(() => {
+		if (filter === 'alpha') {
+			return data.recipes.filter(recipeFilter).filter(searchFilter); // alpha is default from API
+		} else if (filter === 'date_created') {
+			return orderBy(
+				data.recipes.filter(recipeFilter).filter(searchFilter),
+				'date_created',
+				'desc'
+			);
+		} else if (filter === 'simple') {
+			return data.recipes.filter(recipeFilter).filter(searchFilter);
+		} else {
+			return data.recipes.filter(recipeFilter).filter(searchFilter);
+		}
+	});
 
 	async function setCooking(recipe: Recipe) {
 		try {
@@ -64,6 +96,24 @@
 <section class="h-full overflow-auto p-4 flex flex-col gap-4">
 	<div class="flex justify-between">
 		<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Recipes</h1>
+		<SearchFilter
+			bind:searchValue
+			bind:filter
+			filterOptions={[
+				{ title: 'Alphabetical', description: 'Order by recipe name', value: 'alpha' },
+				{
+					title: 'Date Created',
+					description: 'Order by newest recipes first',
+					value: 'date_created'
+				},
+				{
+					title: 'Cooking',
+					description: 'View recipes lined up to cook',
+					value: 'is_cooking'
+				},
+				{ title: 'Simple', description: 'View recipes with 5 or less ingredients', value: 'simple' }
+			]}
+		/>
 		<AddRecipeButton options={data.items} />
 	</div>
 	<ul class="w-full gap-2 flex flex-col">

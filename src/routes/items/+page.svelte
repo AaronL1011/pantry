@@ -11,6 +11,8 @@
 	import Pill from '../../components/Pill.svelte';
 	import SearchFilter from '../../components/SearchFilter.svelte';
 	import { itemTypePillColor } from '../../components/utils';
+	import { flip } from 'svelte/animate';
+	import { quintOut } from 'svelte/easing';
 
 	const { data } = $props<{ data: PageData }>();
 	let deleteCandidate = $state<PantryItem | null>(null);
@@ -138,6 +140,7 @@
 				use:tap={{ timeframe: 300 }}
 				ontap={tapHandler}
 				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border rounded-xl transition active:scale-[0.98]"
+				animate:flip={{ delay: 250, duration: 250, easing: quintOut }}
 			>
 				<section class="flex flex-col gap-2">
 					<p class="font-medium text-sm capitalize select-none">{item.name}</p>
