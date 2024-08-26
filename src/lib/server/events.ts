@@ -54,3 +54,13 @@ export function emitRecipeUpdatedEvent(recipe: RecipeUpdate) {
 		})
 	);
 }
+
+export function emitRecipeDeletedEvent(recipe: { recipeId: number }) {
+	messageClients(
+		'recipe',
+		toMessage({
+			type: 'recipeDeleted',
+			data: JSON.stringify(recipe)
+		})
+	);
+}

@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { ItemUpdate, NewItem } from '../../../types/db';
-import { messageClients } from '$lib/clients';
 import { emitItemAddedEvent, emitItemDeletedEvent, emitItemUpdatedEvent } from '$lib/server/events';
 
 export const PUT: RequestHandler = async ({ locals, request }) => {

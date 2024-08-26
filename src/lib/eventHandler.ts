@@ -46,6 +46,7 @@ function handleRecipeEvent(event: Message) {
 	switch (event.type) {
 		case 'recipeAdded':
 		case 'recipeUpdated':
+		case 'recipeDeleted':
 		default:
 			invalidateAll();
 			break;
