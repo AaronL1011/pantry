@@ -87,6 +87,7 @@
 	}
 
 	async function deleteRecipe(item: RecipeListItem) {
+		if (!window.confirm('Are you sure you want to delete this recipe?')) return;
 		try {
 			await fetch('/api/recipe', { method: 'DELETE', body: JSON.stringify({ recipeId: item.id }) });
 		} catch (e) {

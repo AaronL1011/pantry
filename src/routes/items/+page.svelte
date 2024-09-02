@@ -81,11 +81,11 @@
 	}
 
 	async function deleteItem(e: MouseEvent) {
-		e.stopPropagation();
-		e.preventDefault();
 		if (!deleteCandidate) {
 			return;
 		}
+
+		if (!window.confirm('Are you sure you want to delete this item?')) return;
 
 		try {
 			await fetch('/api/item', {
@@ -106,11 +106,12 @@
 		};
 	}
 
-	function tapHandler() {
+	function tapHandler(id: number){ return () => {
+		if (deleteCandidate?.id === id) return;
 		if (deleteCandidate) {
 			deleteCandidate = null;
 		}
-	}
+	}}
 </script>
 
 <AddItemButton />
@@ -139,7 +140,7 @@
 				use:press={{ timeframe: 300, triggerBeforeFinished: true }}
 				onpress={pressHandler(item)}
 				use:tap={{ timeframe: 300 }}
-				ontap={tapHandler}
+				ontap={tapHandler(item.id)}
 				class="bg-stone-800 p-4 w-full flex justify-between gap-4 border-stone-700 border rounded-xl transition active:scale-[0.98]"
 				animate:flip={{ delay: 250, duration: 250, easing: quintOut }}
 			>
