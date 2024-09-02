@@ -34,7 +34,7 @@ EXPOSE 3000
 
 # Set the environment variable for production
 ENV NODE_ENV=production
-ENV ORIGIN=http://pantry.syd.shroomape.com
+ENV ORIGIN=https://pantry.syd.shroomape.com
 
 # Start the SvelteKit app
 CMD ["node","build/index.js"]
