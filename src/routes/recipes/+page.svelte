@@ -13,21 +13,22 @@
 	import AddRecipeButton from '../../components/AddRecipeButton.svelte';
 	import SearchFilter from '../../components/SearchFilter.svelte';
 	import Pill from '../../components/Pill.svelte';
-	import { press, tap, type PressCustomEvent } from 'svelte-gestures';
+	import { press, tap } from 'svelte-gestures';
 	import DeleteIcon from '../../components/icons/DeleteIcon.svelte';
 	import EditIcon from '../../components/icons/EditIcon.svelte';
+	import { persisted } from 'svelte-persisted-store';
 
 	const { data } = $props<{ data: PageData }>();
 	let searchValue = $state<string>('');
-	let filter = $state<string>('alpha');
 	type RecipeListItem = Recipe & { ingredients: string[] };
+	const filter = persisted('recipeFilter', 'alpha');
 
 	let selectedRecipe = $state<RecipeListItem | null>(null);
 
 	const recipeFilter = (item: RecipeListItem) => {
-		if (filter === 'is_cooking') {
+		if ($filter === 'is_cooking') {
 			return !!item.isCooking;
-		} else if (filter === 'simple') {
+		} else if ($filter === 'simple') {
 			return item.ingredients.length < 6;
 		}
 
@@ -41,15 +42,15 @@
 	};
 
 	let list: RecipeListItem[] = $derived.by(() => {
-		if (filter === 'alpha') {
+		if ($filter === 'alpha') {
 			return data.recipes.filter(recipeFilter).filter(searchFilter); // alpha is default from API
-		} else if (filter === 'date_created') {
+		} else if ($filter === 'date_created') {
 			return orderBy(
 				data.recipes.filter(recipeFilter).filter(searchFilter),
 				'date_created',
 				'desc'
 			);
-		} else if (filter === 'simple') {
+		} else if ($filter === 'simple') {
 			return data.recipes.filter(recipeFilter).filter(searchFilter);
 		} else {
 			return data.recipes.filter(recipeFilter).filter(searchFilter);
@@ -96,6 +97,7 @@
 	async function editRecipe(item: RecipeListItem) {
 		try {
 			// await fetch('/api/recipe', { method: 'DELETE', body: JSON.stringify({ recipeId: item.id }) });
+			console.log(item);
 		} catch (e) {
 			console.log(e);
 		}
@@ -111,16 +113,19 @@
 	}
 
 	function pressHandler(item: RecipeListItem) {
-		return (event: PressCustomEvent) => {
-			event.preventDefault();
+		return () => {
 			selectRecipe(item);
 		};
 	}
 
-	function tapHandler() {
-		if (selectedRecipe) {
-			selectedRecipe = null;
-		}
+	function tapHandler(item: RecipeListItem) {
+		return () => {
+			if (item.id === selectedRecipe?.id) return;
+
+			if (selectedRecipe) {
+				selectedRecipe = null;
+			}
+		};
 	}
 </script>
 
@@ -167,21 +172,13 @@
 	<div class="flex gap-2">
 		<button
 			class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-stone-700 transition h-fit"
-			onclick={(e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				editRecipe(item);
-			}}
+			onclick={() => editRecipe(item)}
 		>
 			<EditIcon />
 		</button>
 		<button
-			class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-stone-700 transition h-fit text-red-500"
-			onclick={(e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				deleteRecipe(item);
-			}}
+			class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-stone-700 transition h-fit text-red-400"
+			onclick={() => deleteRecipe(item)}
 		>
 			<DeleteIcon />
 		</button>
@@ -192,8 +189,8 @@
 	<div class="flex justify-between">
 		<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Recipes</h1>
 		<SearchFilter
+			bind:filter={$filter}
 			bind:searchValue
-			bind:filter
 			filterOptions={[
 				{ title: 'Alphabetical', description: 'Order by recipe name', value: 'alpha' },
 				{
@@ -211,7 +208,7 @@
 		/>
 		<AddRecipeButton options={data.items} />
 	</div>
-	<ul class="w-full gap-2 flex flex-col">
+	<ul class="w-full gap-2 flex flex-col mb-28">
 		{#each list as item (item.id)}
 			<li
 				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border rounded-xl overflow-hidden transition active:scale-95"
@@ -220,9 +217,9 @@
 				use:press={{ timeframe: 500, triggerBeforeFinished: true }}
 				onpress={pressHandler(item)}
 				use:tap={{ timeframe: 300 }}
-				ontap={tapHandler}
+				ontap={tapHandler(item)}
 			>
-				<article class="flex flex-col w-full select-none">
+				<article class="flex flex-col w-full">
 					{#if item.img_mime_type}
 						<img
 							src={`/api/recipe/img?id=${item.id}`}
@@ -230,7 +227,7 @@
 							class="aspect-[4/3] object-cover object-center select-none"
 						/>
 					{/if}
-					<section class="p-4 flex flex-col gap-2 select-none">
+					<section class="p-4 flex flex-col gap-2">
 						<div class="flex justify-between w-full gap-2">
 							{@render recipeTitle(item)}
 							{#if selectedRecipe && selectedRecipe.id === item.id}

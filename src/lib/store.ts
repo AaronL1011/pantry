@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { writable } from 'svelte/store';
 import type { Item, MeasurementUnit } from '../types/db';
+
 export const session = writable({
 	session_id: nanoid()
 });

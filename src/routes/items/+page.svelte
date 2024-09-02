@@ -13,20 +13,21 @@
 	import { itemTypePillColor } from '../../components/utils';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
+	import { persisted } from 'svelte-persisted-store';
 
 	const { data } = $props<{ data: PageData }>();
 	let deleteCandidate = $state<PantryItem | null>(null);
 	let searchValue = $state<string>('');
-	let filter = $state<string>('alpha');
+	let filter = persisted('itemFilter', 'alpha');
 
 	$effect(() => {
 		usePantryList.update(() => sortBy(data.items, 'name'));
 	});
 
 	const stockFilter = (item: PantryItem) => {
-		if (filter === 'in_stock') {
+		if ($filter === 'in_stock') {
 			return !!item.stocked;
-		} else if (filter === 'out_of_stock') {
+		} else if ($filter === 'out_of_stock') {
 			return !item.stocked;
 		}
 
@@ -40,15 +41,15 @@
 	};
 
 	const pantryList = $derived.by(() => {
-		if (filter === 'alpha') {
+		if ($filter === 'alpha') {
 			return sortBy($usePantryList.filter(stockFilter).filter(searchFilter), 'name');
-		} else if (filter === 'date_created') {
+		} else if ($filter === 'date_created') {
 			return orderBy(
 				$usePantryList.filter(stockFilter).filter(searchFilter),
 				'date_created',
 				'desc'
 			);
-		} else if (filter === 'item_type') {
+		} else if ($filter === 'item_type') {
 			return sortBy($usePantryList.filter(stockFilter).filter(searchFilter), 'type');
 		} else {
 			return $usePantryList.filter(stockFilter).filter(searchFilter);
@@ -118,7 +119,7 @@
 		<h1 class="text-2xl font-semibold p-0 backdrop-blur-[1px] w-fit rounded">Pantry</h1>
 		<SearchFilter
 			bind:searchValue
-			bind:filter
+			bind:filter={$filter}
 			filterOptions={[
 				{ title: 'Alphabetical', description: 'Order by item name', value: 'alpha' },
 				{ title: 'Date Created', description: 'Order by newest first', value: 'date_created' },
