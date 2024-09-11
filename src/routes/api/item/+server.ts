@@ -40,6 +40,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			type: body.type,
 			isle: body.isle,
 			stocked: body.stocked,
+			vegan: body.vegan,
 			created_at
 		};
 

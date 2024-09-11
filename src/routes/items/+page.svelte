@@ -42,7 +42,7 @@
 
 	const pantryList = $derived.by(() => {
 		if ($filter === 'alpha') {
-			return sortBy($usePantryList.filter(stockFilter).filter(searchFilter), 'name');
+			return orderBy($usePantryList.filter(stockFilter).filter(searchFilter), 'name', 'asc');
 		} else if ($filter === 'date_created') {
 			return orderBy(
 				$usePantryList.filter(stockFilter).filter(searchFilter),
@@ -106,12 +106,14 @@
 		};
 	}
 
-	function tapHandler(id: number){ return () => {
-		if (deleteCandidate?.id === id) return;
-		if (deleteCandidate) {
-			deleteCandidate = null;
-		}
-	}}
+	function tapHandler(id: number) {
+		return () => {
+			if (deleteCandidate?.id === id) return;
+			if (deleteCandidate) {
+				deleteCandidate = null;
+			}
+		};
+	}
 </script>
 
 <AddItemButton />

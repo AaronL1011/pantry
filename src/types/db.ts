@@ -1,4 +1,5 @@
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely';
+
 export interface Database {
 	item: ItemTable;
 	recipe: RecipeTable;
@@ -8,6 +9,8 @@ export interface Database {
 export type Isle =
 	| 'asian'
 	| 'canned goods'
+	| 'cleaning'
+	| 'cosmetics'
 	| 'fridge'
 	| 'frozen'
 	| 'grains'
@@ -16,6 +19,7 @@ export type Isle =
 	| 'meats'
 	| 'produce'
 	| 'plant based';
+
 export type ItemType = 'ingredient' | 'snack' | 'non-perishable' | 'drink' | 'other';
 export interface ItemTable {
 	id: Generated<number>;
@@ -76,3 +80,6 @@ export interface RecipeItemTable {
 export type RecipeItem = Selectable<RecipeItemTable>;
 export type NewRecipeItem = Insertable<RecipeItemTable>;
 export type RecipeItemUpdate = Updateable<RecipeItemTable>;
+
+export type RecipeListItemIngredient = RecipeItem & { name: string };
+export type RecipeListItem = Recipe & { ingredients: RecipeListItemIngredient[] };

@@ -16,8 +16,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			db.fn.count('recipeItem.item_id').as('recipeCount')
 		])
 		.groupBy('item.id')
+		.orderBy('item.name')
 		.execute();
-
+	console.log(items);
 	return {
 		items
 	};

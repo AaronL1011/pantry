@@ -3,27 +3,40 @@
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import type { PageData } from './$types';
-	import type { Recipe, RecipeUpdate } from '../../types/db';
+	import type { Recipe, RecipeItem, RecipeListItem, RecipeUpdate } from '../../types/db';
 	import { orderBy } from 'lodash-es';
 	import CookingIcon from '../../components/icons/CookingIcon.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import CaretLeft from '../../components/icons/CaretLeft.svelte';
 	import CaretRight from '../../components/icons/CaretRight.svelte';
 	import PortionCount from '../../components/icons/PortionCount.svelte';
-	import AddRecipeButton from '../../components/AddRecipeButton.svelte';
+	import AddRecipeButton from '../../components/UpsertRecipe.svelte';
 	import SearchFilter from '../../components/SearchFilter.svelte';
 	import Pill from '../../components/Pill.svelte';
 	import { press, tap } from 'svelte-gestures';
 	import DeleteIcon from '../../components/icons/DeleteIcon.svelte';
 	import EditIcon from '../../components/icons/EditIcon.svelte';
 	import { persisted } from 'svelte-persisted-store';
+	import CloseIcon from '../../components/icons/CloseIcon.svelte';
+	import CheckIcon from '../../components/icons/CheckIcon.svelte';
+	import UpsertRecipe from '../../components/UpsertRecipe.svelte';
+	import ChefIcon from '../../components/icons/ChefIcon.svelte';
 
 	const { data } = $props<{ data: PageData }>();
 	let searchValue = $state<string>('');
-	type RecipeListItem = Recipe & { ingredients: string[] };
 	const filter = persisted('recipeFilter', 'alpha');
 
+	let isCreatingRecipe = $state<boolean>(false);
 	let selectedRecipe = $state<RecipeListItem | null>(null);
+	let editTarget = $state<RecipeListItem | null>(null);
+
+	$effect(() => {
+		if (isCreatingRecipe) {
+			document
+				.getElementById('create-recipe-item')
+				?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+		}
+	});
 
 	const recipeFilter = (item: RecipeListItem) => {
 		if ($filter === 'is_cooking') {
@@ -97,7 +110,7 @@
 
 	async function editRecipe(item: RecipeListItem) {
 		try {
-			// await fetch('/api/recipe', { method: 'DELETE', body: JSON.stringify({ recipeId: item.id }) });
+			await fetch('/api/recipe', { method: 'PUT', body: JSON.stringify({ recipeId: item.id }) });
 			console.log(item);
 		} catch (e) {
 			console.log(e);
@@ -173,7 +186,9 @@
 	<div class="flex gap-2">
 		<button
 			class="bg-stone-800 rounded-lg p-1 active:scale-90 active:bg-stone-700 transition h-fit"
-			onclick={() => editRecipe(item)}
+			onclick={() => {
+				editTarget = item;
+			}}
 		>
 			<EditIcon />
 		</button>
@@ -207,12 +222,34 @@
 				{ title: 'Simple', description: 'View recipes with 5 or less ingredients', value: 'simple' }
 			]}
 		/>
-		<AddRecipeButton options={data.items} />
+		<!-- <AddRecipeButton options={data.items} /> -->
+		<button
+			class="h-16 w-16 fixed bottom-32 right-4 rounded-full border-4 border-orange-600 bg-orange-500 text-white flex justify-center items-center shadow-xl active:scale-90 active:bg-orange-500 transition"
+			onclick={() => {
+				isCreatingRecipe = !isCreatingRecipe;
+			}}
+		>
+			<ChefIcon active={isCreatingRecipe} />
+		</button>
 	</div>
-	<ul class="w-full gap-2 flex flex-col mb-28">
+	<ul id="recipe-list" class="w-full gap-2 flex flex-col mb-28">
+		{#if isCreatingRecipe}
+			<li
+				id="create-recipe-item"
+				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border rounded-xl overflow-hidden"
+				out:fly={{ x: 100 }}
+			>
+				<UpsertRecipe
+					options={data.items}
+					onClose={() => {
+						isCreatingRecipe = false;
+					}}
+				/>
+			</li>
+		{/if}
 		{#each list as item (item.id)}
 			<li
-				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border rounded-xl overflow-hidden transition active:scale-95"
+				class="bg-stone-800 w-full flex justify-between gap-4 border-stone-700 border rounded-xl overflow-hidden"
 				animate:flip={{ delay: 250, duration: 250, easing: quintOut }}
 				out:fly={{ x: 100 }}
 				use:press={{ timeframe: 500, triggerBeforeFinished: true }}
@@ -220,30 +257,40 @@
 				use:tap={{ timeframe: 300 }}
 				ontap={tapHandler(item)}
 			>
-				<article class="flex flex-col w-full">
-					{#if item.img_mime_type}
-						<img
-							src={`/api/recipe/img?id=${item.id}`}
-							alt="a succulent meal"
-							class="aspect-[4/3] object-cover object-center select-none"
-						/>
-					{/if}
-					<section class="p-4 flex flex-col gap-2">
-						<div class="flex justify-between w-full gap-2">
-							{@render recipeTitle(item)}
-							{#if selectedRecipe && selectedRecipe.id === item.id}
-								{@render editRecipeControls(item)}
-							{:else}
-								{@render cookingControls(item)}
-							{/if}
-						</div>
-						<div class="flex gap-1 flex-wrap">
-							{#each item.ingredients as ingredient}
-								<Pill color="bg-stone-600">{ingredient}</Pill>
-							{/each}
-						</div>
-					</section>
-				</article>
+				{#if editTarget && editTarget.id === item.id}
+					<UpsertRecipe
+						options={data.items}
+						recipe={item}
+						onClose={() => {
+							editTarget = null;
+						}}
+					/>
+				{:else}
+					<article class="flex flex-col w-full">
+						{#if item.img_mime_type}
+							<img
+								src={`/api/recipe/img?id=${item.id}`}
+								alt="a succulent meal"
+								class="aspect-[4/3] object-cover object-center select-none"
+							/>
+						{/if}
+						<section class="p-4 flex flex-col gap-2">
+							<div class="flex justify-between w-full gap-2">
+								{@render recipeTitle(item)}
+								{#if selectedRecipe && selectedRecipe.id === item.id}
+									{@render editRecipeControls(item)}
+								{:else}
+									{@render cookingControls(item)}
+								{/if}
+							</div>
+							<div class="flex gap-1 flex-wrap">
+								{#each item.ingredients as ingredient}
+									<Pill color="bg-stone-600">{ingredient.name}</Pill>
+								{/each}
+							</div>
+						</section>
+					</article>
+				{/if}
 			</li>
 		{/each}
 	</ul>

@@ -61,6 +61,7 @@ export async function seedData(db: Kysely<Database>) {
 async function seedItems(txn: Transaction<Database>) {
 	const items: NewItem[] = itemsData.map((item) => ({
 		...item,
+		name: item.name.toLowerCase(),
 		type: item.type as ItemType,
 		isle: item.isle as Isle,
 		created_at: new Date().toISOString()
@@ -76,6 +77,7 @@ async function seedItems(txn: Transaction<Database>) {
 async function seedRecipes(txn: Transaction<Database>) {
 	const recipes: NewRecipe[] = recipeData.map((recipe) => ({
 		...recipe,
+		name: recipe.name.toLowerCase(),
 		link: recipe.link ?? undefined,
 		created_at: new Date().toISOString()
 	}));

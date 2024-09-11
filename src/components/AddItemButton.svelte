@@ -75,7 +75,8 @@
 					type: type as ItemType,
 					isle: isle as Isle,
 					stocked: stocked ? 1 : 0,
-					created_at: new Date().toISOString()
+					created_at: new Date().toISOString(),
+					vegan: 0
 				};
 
 				await onAddItem(newItem);
@@ -109,6 +110,8 @@
 				<select name="isle" class="border border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="asian">Asian</option>
 					<option value="canned goods">Canned Goods</option>
+					<option value="cleaning">Cleaning</option>
+					<option value="cosmetics">Cosmetics</option>
 					<option value="fridge">Fridge</option>
 					<option value="frozen">Frozen</option>
 					<option value="grains">Grains</option>
