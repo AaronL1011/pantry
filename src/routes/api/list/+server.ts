@@ -44,10 +44,7 @@ async function fetchRecipeItems(db: Kysely<Database>): Promise<any[]> {
 		])
 		.where(({ or, and, eb }) =>
 			or([
-				and([
-					eb('item.type', '=', 'ingredient'),
-					eb('recipe.isCooking', '=', 1)
-				]),
+				and([eb('item.type', '=', 'ingredient'), eb('recipe.isCooking', '=', 1)]),
 				and([
 					eb('item.type', 'in', ['drink', 'non-perishable', 'other', 'snack']),
 					eb('item.stocked', '=', 0)
@@ -81,7 +78,13 @@ function processRecipeItems(recipeItems: any[]): ListItem[] {
 			}
 
 			// Sum the quantities in the appropriate category
-			updateListItemQuantity(itemsMap[itemId], unit, convertedQty, commonMassUnit, commonVolumeUnit);
+			updateListItemQuantity(
+				itemsMap[itemId],
+				unit,
+				convertedQty,
+				commonMassUnit,
+				commonVolumeUnit
+			);
 		} else {
 			// Handle non-ingredient items (no qty and unit)
 			if (!itemsMap[itemId]) {
@@ -101,8 +104,8 @@ function processRecipeItems(recipeItems: any[]): ListItem[] {
 		}
 	});
 
-	return Object.values(itemsMap)
-};
+	return Object.values(itemsMap);
+}
 function convertQuantity(
 	rawQty: number,
 	unit: MeasurementUnit,
@@ -151,7 +154,7 @@ function updateListItemQuantity(
 	if (unit === '') {
 		listItem.qty.whole += convertedQty;
 	} else {
-		listItem.qty.commonUnit += Math.ceil(convertedQty);
+		listItem.qty.commonUnit += convertedQty;
 		listItem.qty.unitType = massPossibilities.includes(unit) ? commonMassUnit : commonVolumeUnit;
 	}
 

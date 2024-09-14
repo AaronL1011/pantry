@@ -1,38 +1,47 @@
-# create-svelte
+# Pantry
+A minimalist, opinionated and self-hosted approach to pantry management and shopping list automation.
 
-Everything you need to build a Svelte project, powestone by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+![Screenshots of the app pages](/static/preview.png)
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
-
+Pantry runs as a docker container, pull the image with:
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+docker pull ghcr.io/aaronl1011/pantry
+```
+and run it:
+```bash
+docker run -p 3000:3000 ghcr.io/aaronl1011/pantry
 ```
 
-## Developing
+or using docker-compose:
+```yaml
+pantry:
+    image: ghcr.io/aaronl1011/pantry:latest
+    container_name: pantry
+    volumes:
+      - /path/to/your/pantry.db:/app/pantry.db
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
+## Tech Stack
+- SvelteKit w/ Svelte 5
+- TailwindCSS
+- Server Sent Events
+- Kysely
+- SQLite
 
-## Building
+## Guide
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+1. Build your pantry
+    - Fill it with ingredients and other things you buy regularly! The app seeds with a variety of items, customise it to your needs.
+2. Create your recipes
+    - Define the portion count of your meal during creation and add your ingredients. Set the quantity of ingredients relative to the configured portion.
+3. Choose what to cook
+    - Select recipes you'd like to cook and set the desired portions. Your shopping list will be populated with a summed set of recipe ingredients that are NOT in stock.
+4. Do your shopping
+    - Swipe away shopping list items as you purchase them. Item quantities will scale to include enough for all recipes currently set to cook!
+5. ???
+6. Profit!

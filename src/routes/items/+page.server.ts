@@ -18,7 +18,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.groupBy('item.id')
 		.orderBy('item.name')
 		.execute();
-	console.log(items);
 	return {
 		items
 	};

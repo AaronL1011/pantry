@@ -5,7 +5,7 @@ import type { Database } from './types/db'; // this is the Database interface we
 import { initializeTables, seedData } from './utils/db';
 
 const dialect = new SqliteDialect({
-	database: new SQLite('shopping.db')
+	database: new SQLite('pantry.db')
 });
 
 const db = new Kysely<Database>({

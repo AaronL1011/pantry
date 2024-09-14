@@ -4,8 +4,10 @@
 	import CloseIcon from './icons/CloseIcon.svelte';
 	import type { Isle, ItemType, NewItem } from '../types/db';
 	import { invalidateAll } from '$app/navigation';
+	import MultiSelect from 'svelte-multiselect';
 
 	let isOpen = $state(false);
+	let searchText = $state('');
 
 	function maybeMeow() {
 		// Generate a random number between 1 and 10
@@ -96,13 +98,30 @@
 
 			<label for="type" class="flex flex-col gap-2">
 				Type
+				<MultiSelect
+					options={[
+						{ value: 'ingredient', label: 'Ingredient' },
+						{ value: 'snack', label: 'Snack' },
+						{ value: 'non-perishable', label: 'Non-perishable' },
+						{ value: 'drink', label: 'Drink' },
+						{ value: 'other', label: 'Other' }
+					]}
+					bind:searchText
+					allowUserOptions
+					createOptionMsg={`Create ${searchText}`}
+					maxSelect={1}
+					ulOptionsClass="bg-stone-700"
+					outerDivClass="border-stone-700"
+					inputClass="p-2"
+				/>
+				<!-- 
 				<select name="type" class="border border-stone-700 rounded-md p-2 bg-stone-800">
 					<option value="ingredient">Ingredient</option>
 					<option value="snack">Snack</option>
 					<option value="non-perishable">Non-perishable</option>
 					<option value="drink">Drink</option>
 					<option value="other">Other</option>
-				</select>
+				</select> -->
 			</label>
 
 			<label for="isle" class="flex flex-col gap-2">
